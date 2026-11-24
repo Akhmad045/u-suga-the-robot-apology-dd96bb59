@@ -50,6 +50,10 @@ def validate(text):
             raise ValueError("entry line must not be blank")
         if "\r" in line:
             raise ValueError("entry must not contain carriage returns")
+        if line[-1] not in ".!?":
+            raise ValueError(
+                "each entry line must end with sentence punctuation (. ! ?)"
+            )
     return text
 
 
@@ -65,6 +69,8 @@ def self_test():
         ("first line\n", "trailing newline"),
         ("first line\n \n", "blank second line"),
         ("first\r\nsecond", "carriage return"),
+        ("first line\nsecond line", "line without sentence punctuation"),
+        ("first line.\nsecond line", "second line without sentence punctuation"),
     ]
     for text, label in cases:
         try:
@@ -74,9 +80,9 @@ def self_test():
         else:
             raise SystemExit(f"self-test FAIL: {label} was accepted")
     # boundaries: 1 char and exactly 400 chars must pass the length rule
-    validate("y\nz")
+    validate("y.\nz.")
     print("self-test ok: two-line minimal entry accepted")
-    validate("y" * 199 + "\n" + "z" * 200)
+    validate("y" * 198 + ".\n" + "z" * 199 + ".")
     print("self-test ok: 400-char boundary accepted")
     # the entry itself must pass its own gate
     validate(ENTRY)
